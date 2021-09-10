@@ -1,0 +1,4 @@
+# NewsTrader
+Rongxin Zhang
+
+## Introduction
