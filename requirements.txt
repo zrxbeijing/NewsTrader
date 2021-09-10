@@ -1,0 +1,1 @@
+gdelt==0.1.10.5.3 # gdelt API
