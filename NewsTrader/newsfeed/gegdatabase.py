@@ -43,8 +43,11 @@ class GegDatabase:
         """
         Download the master file from geg database
         """
+        if os.path.exists(self.master_file):
+            os.remove(self.master_file)
+
         response = requests.get(url=GegDatabase._MASTER_FILE_URL)
-        if not response.status_code == 0:
+        if not response.status_code == 200:
             logger.info(
                 "There is something wrong with the original url for the master file! Check GDELT GEG!"
             )
@@ -70,8 +73,15 @@ class GegDatabase:
         json_date_list = [
             file.split("/")[-1].split(".")[0][:8] for file in json_file_list
         ]
+
+        json_date_start = pd.to_datetime(json_date_list[0])
+        json_date_end = pd.to_datetime(json_date_list[-1])
+
+        self._check_date_range(json_date_start, json_date_end)
+
         start = self.start.strftime(format="%Y%m%d")
         end = (self.end + pd.Timedelta(value=1, unit="D")).strftime(format="%Y%m%d")
+
         json_file_list = json_file_list[
             json_date_list.index(start) : json_date_list.index(end)
         ]
@@ -94,6 +104,23 @@ class GegDatabase:
         )
         result = [record for result in result_list for record in result]
         return pd.DataFrame(result)
+
+    def _check_date_range(self, json_date_start, json_date_end):
+        """
+        Check whether the input date range is allowed
+        :param json_date_start: the start date of json file
+        :param json_date_end: the end date of json file
+        :return: None
+        """
+        if (self.start - json_date_start).days < 0:
+            self.start = json_date_start
+
+        if (self.start - json_date_end).days > 0:
+            # not in range, update master file
+            self._get_master_file()
+
+        if (self.end - json_date_end).days > 0:
+            self.end = json_date_end
 
     @staticmethod
     def _parse_one_entry(json_file, lang="en"):
