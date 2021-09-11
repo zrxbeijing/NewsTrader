@@ -4,7 +4,7 @@ import time
 import logging
 
 
-logging.basicConfig(level = logging.INFO)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -13,11 +13,8 @@ class GdeltDatabase:
     A database class wrapping the gdelt library.
     """
 
-    def __init__(self,
-                 date,
-                 table,
-                 max_retries=5):
-        
+    def __init__(self, date, table, max_retries=5):
+
         self.gd = gdelt.gdelt(version=2)
         self.date = date
         self.table = table

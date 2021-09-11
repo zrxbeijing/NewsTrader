@@ -1,1 +1,4 @@
 gdelt==0.1.10.5.3 # gdelt API
+
+
+pandas~=1.2.3
