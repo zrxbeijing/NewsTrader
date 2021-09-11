@@ -7,6 +7,11 @@ from functools import partial
 from multiprocessing import cpu_count
 from gzip import decompress
 from NewsTrader.utils.accelerator import run_multitasking
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class GegDatabase:
@@ -20,6 +25,13 @@ class GegDatabase:
     )
 
     def __init__(self, start, end, num_process, master_file_dir="./", lang="en"):
+        """
+        :param start: the start date
+        :param end: the end data
+        :param num_process: how many CPU processes
+        :param master_file_dir: where the master file is stored
+        :param lang: language
+        """
         self.start = pd.to_datetime(start)
         self.end = pd.to_datetime(end)
         self.num_process = num_process
@@ -33,7 +45,7 @@ class GegDatabase:
         """
         response = requests.get(url=GegDatabase._MASTER_FILE_URL)
         if not response.status_code == 0:
-            print(
+            logger.info(
                 "There is something wrong with the original url for the master file! Check GDELT GEG!"
             )
         if not os.path.exists(self.master_file_dir):
@@ -41,12 +53,12 @@ class GegDatabase:
 
         with open(self.master_file, "w") as file:
             file.write(response.text)
-        print("Successfully downloaded master file!")
+        logger.info("Successfully downloaded master file!")
 
     def get_table(self):
         """
         Parse the master file into a DataFrame
-        :return:
+        :return: a pandas Dataframe
         """
         if not os.path.exists(self.master_file):
             self._get_master_file()
@@ -88,8 +100,8 @@ class GegDatabase:
         """
         Parse one single geg entry, ready to be used by the multiprocessing process in _parse_master_file
         :param json_file: one geg entry in the master file
-        :param lang: str, language
-        :return:
+        :param lang: language
+        :return: a entry list
         """
         response = requests.get(json_file)
         json_string = decompress(response.content).decode("utf-8").strip()

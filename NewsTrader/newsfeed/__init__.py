@@ -5,4 +5,3 @@ Extract news from internet or open-source news database
 3. News from Common Crawl news dataset
 4. News from internet via scrapy
 """
-

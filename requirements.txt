@@ -1,4 +1,11 @@
+FinanceDatabase==0.1.7 # ticker info
+yfinance==0.1.59 # data from yahoo finance
+tqdm==4.59.0 # Fast, Extensible Progress Meter
 gdelt==0.1.10.5.3 # gdelt API
+news-please==1.5.18 # news download API
+simpletransformers==0.61.4 # language model
 
 
+Scrapy~=2.4.1
 pandas~=1.2.3
+requests~=2.25.1
