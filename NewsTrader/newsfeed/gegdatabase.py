@@ -1,3 +1,4 @@
+from _typeshed import Self
 import requests
 import os
 import pandas as pd
@@ -80,10 +81,10 @@ class GegDatabase:
         self._check_date_range(json_date_start, json_date_end)
 
         start = self.start.strftime(format="%Y%m%d")
-        end = (self.end + pd.Timedelta(value=1, unit="D")).strftime(format="%Y%m%d")
+        end = self.end.strftime(format="%Y%m%d")
 
         json_file_list = json_file_list[
-            json_date_list.index(start) : json_date_list.index(end)
+            json_date_list.index(start) : json_date_list.index(end)+1
         ]
 
         if self.num_process is None:
