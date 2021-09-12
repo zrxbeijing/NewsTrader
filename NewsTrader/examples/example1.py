@@ -12,3 +12,9 @@ gdelt_data = GdeltDatabase(date="2021-09-01", table="events").query()
 gdelt_data.head()
 
 
+# 2. get data from the geg database
+
+from NewsTrader.newsfeed.gegdatabase import GegDatabase
+
+
+geg_data = GegDatabase(start="2021-09-01", end="2021-09-01", num_process=8).get_table()

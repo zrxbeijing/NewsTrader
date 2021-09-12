@@ -1,4 +1,3 @@
-from _typeshed import Self
 import requests
 import os
 import pandas as pd
@@ -7,7 +6,7 @@ import random
 from functools import partial
 from multiprocessing import cpu_count
 from gzip import decompress
-from NewsTrader.utils.accelerator import run_multitasking
+from ..utils.accelerator import run_multitasking
 import logging
 
 
@@ -83,9 +82,10 @@ class GegDatabase:
         start = self.start.strftime(format="%Y%m%d")
         end = self.end.strftime(format="%Y%m%d")
 
-        json_file_list = json_file_list[
-            json_date_list.index(start) : json_date_list.index(end) + 1
-        ]
+        start_index = json_date_list.index(start)
+        end_index = [i for i, x in enumerate(json_date_list) if x == end][-1]
+
+        json_file_list = json_file_list[start_index, end_index+1]
 
         if self.num_process is None:
             worker_num = 1
