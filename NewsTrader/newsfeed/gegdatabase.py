@@ -84,7 +84,7 @@ class GegDatabase:
         end = self.end.strftime(format="%Y%m%d")
 
         json_file_list = json_file_list[
-            json_date_list.index(start) : json_date_list.index(end)+1
+            json_date_list.index(start) : json_date_list.index(end) + 1
         ]
 
         if self.num_process is None:

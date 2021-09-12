@@ -24,6 +24,7 @@ class GdeltDatabase:
         """
         Basic query method.
         This method will try for several times util data is derived.
+        :return: a Dataframe
         """
         success = False
         result = None
