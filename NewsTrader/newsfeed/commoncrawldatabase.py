@@ -7,6 +7,12 @@ from newsplease import NewsPlease
 from tqdm import tqdm
 from urllib.parse import urlparse
 from ..utils.storage import NewsData
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 
 class CCnewsDatabase:
@@ -68,13 +74,12 @@ class CCnewsDatabase:
         file_path = os.path.join(self.dir_path, file_name)
         if os.path.exists(file_path):
             if os.stat(file_path).st_size/1e+9 > 1:
-                print('file {} already downloaded'.format(file_name))
+                logger.info('file {} already downloaded'.format(file_name))
                 return file_path
             else:
-                print('file {} is not completed downloaded'.format(file_name))
+                logger.info('file {} is not completed downloaded'.format(file_name))
                 os.remove(file_path)
-        print('*'*50)
-        print('Downloading {}'.format(download_url))
+        logger.info('Downloading {}'.format(download_url))
         response = requests.get(download_url, stream=True)
         if response.status_code == 200:
             with open(file_path, 'wb') as f:
@@ -83,8 +88,7 @@ class CCnewsDatabase:
                     if chunk:
                         pbar.update(len(chunk))
                         f.write(chunk)
-        print('Downloaded {}'.format(download_url))
-        print('*'*50)
+        logger.info('Downloaded {}'.format(download_url))
         return file_path
 
     def parse_cc_warc_file(self, file_path):
@@ -148,7 +152,7 @@ def get_news_from_domain(CCnews_database):
     """
     query_result = CCnews_database.query_aws_s3()
     if not query_result:
-        print('There is no news for {}'.format(CCnews_database.date_string))
+        logger.info('There is no news for {}'.format(CCnews_database.date_string))
         return
     news_df_list = []
     for result in query_result:
