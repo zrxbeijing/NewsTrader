@@ -41,17 +41,52 @@ To have a quantitative and complete view of the stock market, it is required tha
 For this news trading project, we need in general two types of data: news data and stock data.
 The first type of data is news data.
 In general, we have two ways of obtaining news data.
-The first one is to extract news data from open-source datasets, such as _CommonCrawl_ and _GDELT_.
+The first one is to extract news data from open-source datasets, such as _GDELT_ and _CommonCrawl_.
 These datasets aim to democratize the access to news and have gain attention from the investment community.
-The first one is the GDELT Project, which claims to be the largest open-source news database.
-Speically, there is a sub news database of the GDELT Project, called Global Entity Graph, from which news are already processed by Google.
-The second one is the Common Crawl Project.
-We focus on the CC news database of the Common Crawl Project, as we are only interested in news articles, but not general webpages.
-We showcase how to dive into these datasets and extract useful text data for the purpose of use in building language
-models.
+### Gdelt databases
+The GDELT Project claims to be the largest open-source news database.
+There is already a python package called __gdelt__, which facilitates the extraction of Gdelt databases.
+To simplify the usage, we wrap the main functionality of __gdelt__ into a query class.
 
-If the news article data is not available, an alternative way is to scrape down news articles from websites in a polite and gentle way, via fast scraping methods such as
-_scrapy_, _goose_ and _newsplease_. 
-We try to build a simple scrapy framework to get historical or live news from major news websites in a gentle manner.
+```
+from NewsTrader.newsfeed.gdeltdatabase import GdeltDatabase
+
+
+# three sub databases are available: events, gkg, and mentions
+gdelt_data = GdeltDatabase(date="2021-09-01", table="events").query()
+gdelt_data.head()
+```
+
+Speically, there is another sub news database of the GDELT Project, called Global Entity Graph, in which news are already processed by Google.
+However, there is no corresponding library which can easily extract information from this sub database.
+In this project, we provide a convenient tool to get news data from it.
+
+```
+from NewsTrader.newsfeed.gegdatabase import GegDatabase
+
+
+geg_data = GegDatabase(start="2021-09-01", end="2021-09-01", num_process=8).get_table()
+geg_data.head()
+
+```
+
+### CommonCrawl news database
+The CommonCrawl provides tons of scrapped webpages and served as an important source of internet data.
+We focus explicitly on the CC news database of the CommonCrawl Project, as we are only interested in news articles, but not general webpages.
+We showcase how to dive into these datasets and extract useful text data for the purpose of use in building language
+models by leveraging the library __newsplease__.
+
+```
+from NewsTrader.newsfeed.commoncrawldatabase import CCnewsDatabase, get_news_from_domain
+
+
+cc_news_database = CCnewsDatabase(date_string='2020-09-01 12:00:00', only_allowed_domains=True, allowed_domains=['finance.yahoo.com'])
+cc_news = get_news_from_domain(cc_news_database)
+
+```
+
+If the news article data is not available (in a open-source database), an alternative way is to scrape down news articles from websites in a polite and gentle way, via fast scraping methods such as _scrapy_. 
+We try to build a very simple scrapy framework to get historical or live news from major news websites in a gentle manner.
 Besides scraping down html pages, another major challenge is to parse html pages from various sources in a structured way.
 Thanks to the comprehensive extractor module of the wonderfull package _newsplease_, we can extract useful news information such as news title, news main text and news publish date in a relatively efficient way.
+
