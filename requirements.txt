@@ -4,6 +4,7 @@ tqdm==4.59.0 # Fast, Extensible Progress Meter
 gdelt==0.1.10.5.3 # gdelt API
 news-please==1.5.18 # news download API
 simpletransformers==0.61.4 # language model
+news-please==1.5.21 # news extractor
 
 
 Scrapy~=2.4.1

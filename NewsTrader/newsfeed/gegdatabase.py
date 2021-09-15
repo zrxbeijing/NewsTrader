@@ -85,7 +85,7 @@ class GegDatabase:
         start_index = json_date_list.index(start)
         end_index = [i for i, x in enumerate(json_date_list) if x == end][-1]
 
-        json_file_list = json_file_list[start_index:end_index+1]
+        json_file_list = json_file_list[start_index : end_index + 1]
 
         if self.num_process is None:
             worker_num = 1
