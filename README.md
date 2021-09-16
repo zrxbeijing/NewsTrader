@@ -90,3 +90,14 @@ We try to build a very simple scrapy framework to get historical or live news fr
 Besides scraping down html pages, another major challenge is to parse html pages from various sources in a structured way.
 Thanks to the comprehensive extractor module of the wonderfull package _newsplease_, we can extract useful news information such as news title, news main text and news publish date in a relatively efficient way.
 
+```
+from NewsTrader.newsfeed.gdeltdatabase import GdeltDatabase
+from NewsTrader.newsfeed.downloader import get_articles
+
+
+# given urls, get the articles from the servers
+gdelt_data = GdeltDatabase(date="2021-09-01", table="events").query()
+urls = [url for url in list(gdelt_data.loc[0:100]['SOURCEURL']) if type(url) is str]
+articles = get_articles(urls)
+
+```
