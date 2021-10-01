@@ -43,7 +43,7 @@ The first type of data is news data.
 In general, we have two ways of obtaining news data.
 The first one is to extract news data from open-source datasets, such as _GDELT_ and _CommonCrawl_.
 These datasets aim to democratize the access to news and have gain attention from the investment community.
-### Gdelt databases
+#### Gdelt databases
 The GDELT Project claims to be the largest open-source news database.
 There is already a python package called __gdelt__, which facilitates the extraction of Gdelt databases.
 To simplify the usage, we wrap the main functionality of __gdelt__ into a query class.
@@ -70,7 +70,7 @@ geg_data.head()
 
 ```
 
-### CommonCrawl news database
+#### CommonCrawl news database
 The CommonCrawl provides tons of scrapped webpages and served as an important source of internet data.
 We focus explicitly on the CC news database of the CommonCrawl Project, as we are only interested in news articles, but not general webpages.
 We showcase how to dive into these datasets and extract useful text data for the purpose of use in building language
@@ -85,6 +85,7 @@ cc_news = get_news_from_domain(cc_news_database)
 
 ```
 
+#### General news scrapying
 If the news article data is not available (in a open-source database), an alternative way is to scrape down news articles from websites in a polite and gentle way, via fast scraping methods such as _scrapy_. 
 We try to build a very simple scrapy framework to get historical or live news from major news websites in a gentle manner.
 Besides scraping down html pages, another major challenge is to parse html pages from various sources in a structured way.
@@ -99,5 +100,57 @@ from NewsTrader.newsfeed.downloader import get_articles
 gdelt_data = GdeltDatabase(date="2021-09-01", table="events").query()
 urls = [url for url in list(gdelt_data.loc[0:100]['SOURCEURL']) if type(url) is str]
 articles = get_articles(urls)
+
+```
+
+### News feature extraction
+This project provides methods to extract features from news articles. 
+#### Extract titles from given urls
+Sometimes news articles are not available, but urls are provided.
+Many news articles are assigned with a url in which the title information is embedded.
+We make use of this point to extract title information from urls to do quick check of the news article.
+For quick screening of articles, we don't need to scrape down the original articles from servers.
+
+```
+from NewsTrader.newsfeed.gdeltdatabase import GdeltDatabase
+from NewsTrader.newsfeature import extract_title
+
+df = GdeltDatabase(date='2021-09-14', table='events').query()
+
+df = df[df['Actor1Type1Code'] == 'MNC'].reset_index(drop=True)
+
+df['title'] = extract_title(list(df.SOURCEURL), mode='url', check_english=False, num_process=16)
+df = df.dropna(subset=['title']).reset_index(drop=True)
+
+
+```
+
+#### Extract symbols
+We can extract symbols from sentences if any listed stock is mentioned in sentences.
+This is a very important feature of this project that can link news articles with specific companies and thus enables the news trading idea.
+The basic idea behind this feature is that we first pick up organization names by applying NER function of the BERT model and then compare their word embeddings with those of tickers in the ticker database.
+
+
+```
+from NewsTrader.newsfeed.gdeltdatabase import GdeltDatabase
+from NewsTrader.newsfeature import extract_title, extract_symbols
+
+df = GdeltDatabase(date='2021-09-14', table='events').query()
+
+df = df[df['Actor1Type1Code'] == 'MNC'].reset_index(drop=True)
+
+df['title'] = extract_title(list(df.SOURCEURL), mode='url', check_english=False, num_process=16)
+df = df.dropna(subset=['title']).reset_index(drop=True)
+
+titles = list(df.title)
+result = extract_symbols(titles,
+                         min_score=0.65, 
+                         min_similarity=0.90, 
+                         only_preferred=False)
+
+df['possible_symbols'] = [None if candidate_list is None else [candidate['symbol'] for candidate in candidate_list] for candidate_list in result]
+df['company_names'] = [None if candidate_list is None else [candidate['long_name'] for candidate in candidate_list] for candidate_list in result]
+df = df[['SOURCEURL', 'title',
+       'possible_symbols', 'company_names']]
 
 ```
