@@ -80,7 +80,7 @@ models by leveraging the library __newsplease__.
 from NewsTrader.newsfeed.commoncrawldatabase import CCnewsDatabase, get_news_from_domain
 
 
-cc_news_database = CCnewsDatabase(date_string='2020-09-01 12:00:00', only_allowed_domains=True, allowed_domains=['finance.yahoo.com'])
+cc_news_database = CCnewsDatabase(date_string='2020-09-01 12:00:00', only_allowed_domains=True, allowed_domains=['marketwatch.com'])
 cc_news = get_news_from_domain(cc_news_database)
 
 ```
@@ -117,8 +117,6 @@ from NewsTrader.newsfeature import extract_title
 
 df = GdeltDatabase(date='2021-09-14', table='events').query()
 
-df = df[df['Actor1Type1Code'] == 'MNC'].reset_index(drop=True)
-
 df['title'] = extract_title(list(df.SOURCEURL), mode='url', check_english=False, num_process=16)
 df = df.dropna(subset=['title']).reset_index(drop=True)
 
@@ -135,9 +133,7 @@ The basic idea behind this feature is that we first pick up organization names b
 from NewsTrader.newsfeed.gdeltdatabase import GdeltDatabase
 from NewsTrader.newsfeature import extract_title, extract_symbols
 
-df = GdeltDatabase(date='2021-09-14', table='events').query()
-
-df = df[df['Actor1Type1Code'] == 'MNC'].reset_index(drop=True)
+df = GdeltDatabase(date='2021-10-01', table='events').query()
 
 df['title'] = extract_title(list(df.SOURCEURL), mode='url', check_english=False, num_process=16)
 df = df.dropna(subset=['title']).reset_index(drop=True)
@@ -145,12 +141,26 @@ df = df.dropna(subset=['title']).reset_index(drop=True)
 titles = list(df.title)
 result = extract_symbols(titles,
                          min_score=0.65, 
-                         min_similarity=0.90, 
+                         min_similarity=0.80, 
                          only_preferred=False)
 
 df['possible_symbols'] = [None if candidate_list is None else [candidate['symbol'] for candidate in candidate_list] for candidate_list in result]
 df['company_names'] = [None if candidate_list is None else [candidate['long_name'] for candidate in candidate_list] for candidate_list in result]
 df = df[['SOURCEURL', 'title',
        'possible_symbols', 'company_names']]
+
+df = df.dropna(subset=['possible_symbols'])
+
+```
+
+Another example using the news from CommonCrawl database:
+
+```
+from NewsTrader.newsfeed.commoncrawldatabase import CCnewsDatabase, get_news_from_domain
+
+
+cc_news_database = CCnewsDatabase(date_string='2020-10-01 12:00:00', only_allowed_domains=True, allowed_domains=['marketwatch.com'])
+cc_news = get_news_from_domain(cc_news_database)
+
 
 ```

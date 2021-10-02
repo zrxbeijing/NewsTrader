@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 import scipy.spatial
 import enchant
 from functools import partial
-from NewsTrader.utils.accelerator import run_multitasking
+from .utils.accelerator import run_multitasking
 import FinanceDatabase as fd
 import os.path
 
