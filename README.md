@@ -80,7 +80,7 @@ models by leveraging the library __newsplease__.
 from NewsTrader.newsfeed.commoncrawldatabase import CCnewsDatabase, get_news_from_domain
 
 
-cc_news_database = CCnewsDatabase(date_string='2020-09-01 12:00:00', only_allowed_domains=True, allowed_domains=['marketwatch.com'])
+cc_news_database = CCnewsDatabase(date_string='2020-09-01 12:00:00', only_allowed_domains=True, allowed_domains=['reuters.com'])
 cc_news = get_news_from_domain(cc_news_database)
 
 ```
@@ -157,10 +157,43 @@ Another example using the news from CommonCrawl database:
 
 ```
 from NewsTrader.newsfeed.commoncrawldatabase import CCnewsDatabase, get_news_from_domain
+from NewsTrader.newsfeature import extract_symbols
 
 
-cc_news_database = CCnewsDatabase(date_string='2020-10-01 12:00:00', only_allowed_domains=True, allowed_domains=['marketwatch.com'])
+cc_news_database = CCnewsDatabase(date_string='2020-09-29 12:00:00', only_allowed_domains=True, allowed_domains=['reuters.com'])
 cc_news = get_news_from_domain(cc_news_database)
+
+
+titles = list(cc_news.title)
+result = extract_symbols(titles,
+                         min_score=0.65, 
+                         min_similarity=0.80, 
+                         only_preferred=False)
+
+cc_news['possible_symbols'] = [None if candidate_list is None else [candidate['symbol'] for candidate in candidate_list] for candidate_list in result]
+cc_news['company_names'] = [None if candidate_list is None else [candidate['long_name'] for candidate in candidate_list] for candidate_list in result]
+
+cc_news = cc_news.dropna(subset=['possible_symbols'])
+
+```
+
+One more example for extracting tickers from Google News (through RapdiAPI)
+
+```
+
+import requests
+
+url = "https://google-news1.p.rapidapi.com/topic-headlines"
+
+querystring = {"topic":"BUSINESS","country":"US","lang":"en","limit":"50"}
+
+headers = {
+    'x-rapidapi-host': "google-news1.p.rapidapi.com",
+    'x-rapidapi-key': "0e9a2e3fd7msheb8894685c98e99p1377a1jsn7417014d52d3"
+    }
+
+response = requests.request("GET", url, headers=headers, params=querystring)
+
 
 
 ```
