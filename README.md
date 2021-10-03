@@ -182,6 +182,7 @@ One more example for extracting tickers from Google News (through RapdiAPI)
 ```
 
 import requests
+import pandas as pd
 
 url = "https://google-news1.p.rapidapi.com/topic-headlines"
 
@@ -193,7 +194,18 @@ headers = {
     }
 
 response = requests.request("GET", url, headers=headers, params=querystring)
+articles = response.json()['articles']
+news_df = pd.DataFrame(articles)
 
+titles = list(news_df.title)
+result = extract_symbols(titles,
+                         min_score=0.65, 
+                         min_similarity=0.80, 
+                         only_preferred=False)
 
+news_df['possible_symbols'] = [None if candidate_list is None else [candidate['symbol'] for candidate in candidate_list] for candidate_list in result]
+news_df['company_names'] = [None if candidate_list is None else [candidate['long_name'] for candidate in candidate_list] for candidate_list in result]
+
+news_df = news_df.dropna(subset=['possible_symbols'])
 
 ```
