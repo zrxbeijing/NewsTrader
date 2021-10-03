@@ -189,7 +189,7 @@ querystring = {"topic":"BUSINESS","country":"US","lang":"en","limit":"50"}
 
 headers = {
     'x-rapidapi-host': "google-news1.p.rapidapi.com",
-    'x-rapidapi-key': "0e9a2e3fd7msheb8894685c98e99p1377a1jsn7417014d52d3"
+    'x-rapidapi-key': "your-api-key"
     }
 
 response = requests.request("GET", url, headers=headers, params=querystring)
