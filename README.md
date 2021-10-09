@@ -1,5 +1,5 @@
 # NewsTrader
-Rongxin Zhang
+
 
 ## Introduction
 _NewsTrade_ is a Python package for news trading.
