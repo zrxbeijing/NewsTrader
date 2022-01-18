@@ -209,3 +209,4 @@ news_df['company_names'] = [None if candidate_list is None else [candidate['long
 news_df = news_df.dropna(subset=['possible_symbols'])
 
 ```
+#### Further functionality
