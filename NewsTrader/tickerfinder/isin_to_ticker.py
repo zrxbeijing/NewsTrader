@@ -1,9 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import json
-import pandas as pd
-import time
-from concurrent.futures import ThreadPoolExecutor
 
 
 def isin_to_ticker(isin):
