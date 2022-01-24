@@ -4,12 +4,15 @@ import ast
 
 # yahoo_finance_suffix contains information about the construction of yahoo tickers.
 # MIC contains information about stock exchanges
-yahoo_df = pd.read_excel("yahoo_finance_suffix.xlsx", index_col=[0])
-mic_df = pd.read_excel("MIC.xls")
+yahoo_df = pd.read_excel("../resource/yahoo_finance_suffix.xlsx", index_col=[0])
+mic_df = pd.read_excel("../resource/MIC.xls")
 
 
 # get suffix
 def get_exchange_suffix_index(isin, yahoo_df, mic_df):
+    """
+    get the yahoo exchange, suffix and corresponding index from isin.
+    """
     # check whether isin is a symbol
     if len(isin) < 12:
         ideal_suffix = None
@@ -40,6 +43,9 @@ def get_exchange_suffix_index(isin, yahoo_df, mic_df):
 
 # build ticker
 def get_ticker(symbol_list, exchange, suffix):
+    """
+    get the complete yhaoo ticker with which historical data can be retrieved.
+    """
     if pd.isna(symbol_list):
         return None
     symbol_list = ast.literal_eval(symbol_list)
