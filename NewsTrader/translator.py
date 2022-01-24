@@ -1,16 +1,16 @@
-# decide news language
-from langdetect import detect
-import pandas as pd
-from NewsTrader.utils.accelerator import run_multitasking
-from functools import partial
+"""
+This module provides the functionality of translation.
+Translation often takes very long time.
+We utilize the argotranslate package to speed up local translation.
+""" 
 from argostranslate import package, translate
 from argostranslate import settings
-import time
-import pandas as pd
 
 
-# truncate the text to shorter length
 def truncate_text(text, size):
+    """
+    truncate the text to a given length.
+    """
     word_list = text.split()
     if len(word_list) > int(size):
         word_list = word_list[0 : int(size)]
@@ -18,6 +18,9 @@ def truncate_text(text, size):
 
 
 def translate(data_df, model_path, device):
+    """
+    Local translation using argotranslate package.
+    """
     if device == "gpu":
         settings.device = "cuda"
 

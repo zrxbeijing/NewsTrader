@@ -3,6 +3,10 @@ from bs4 import BeautifulSoup
 
 
 def isin_to_ticker(isin):
+    """
+    Given isin, get tickers on exchanges.
+    We send queries to morningstar.com to get the ticker information.
+    """
     if not isinstance(isin, str):
         return None
     if len(isin) < 12:

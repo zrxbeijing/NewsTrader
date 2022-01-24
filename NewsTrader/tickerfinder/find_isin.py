@@ -18,6 +18,7 @@ finanzen_base_url = "https://www.finanzen.net/suchergebnis.asp?_search="
 def get_wkn_isin(name, cache_df):
     """
     get wkn and isin from company name.
+    note that we cache the query result so that we don't need to send request everytime.
     """
     # lookup in the cache_df
     query_result = cache_df[cache_df["company_name"] == name]
@@ -36,12 +37,13 @@ def get_wkn_isin(name, cache_df):
     response = requests.get(url, headers=HEADERS)
     time.sleep(5)
     # get query result
+    company_name = None
+    isin = None
+    wkn = None
     try_num = 1
     while response.status_code != 200:
+        # we try 7 times before we quit
         if try_num >= 6:
-            company_name = None
-            isin = None
-            wkn = None
             found = "query time out"
             return company_name, wkn, isin, cache_df, found
         # avoid hitting the server too hard
@@ -62,17 +64,9 @@ def get_wkn_isin(name, cache_df):
                 found = "query right"
             else:
                 found = "query wrong"
-
         else:
-            company_name = None
-            isin = None
-            wkn = None
             found = "query zero"
-
     else:
-        company_name = None
-        isin = None
-        wkn = None
         found = "query no"
 
     cache_df = cache_df.append(
