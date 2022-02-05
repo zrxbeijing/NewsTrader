@@ -155,19 +155,19 @@ class CCnewsDatabase:
         return result
 
 
-def get_info_from_domain(ccnews_database, news_or_html = 'news'):
+def get_info_from_domain(ccnews_database, news_or_html="news"):
     """
     Main entry point to get the desired news from specific domains.
     :return: a DataFrame containing the news data.
     """
     query_result = ccnews_database.query_aws_s3()
     if not query_result:
-        print('There is no news for {}'.format(ccnews_database.date_string))
+        print("There is no news for {}".format(ccnews_database.date_string))
         return
     result_df_list = []
     for result in query_result:
         file_path = ccnews_database.download_cc_warc_file(result)
-        if news_or_html == 'news':
+        if news_or_html == "news":
             func = ccnews_database.parse_cc_warc_file
         else:
             func = ccnews_database.get_html_from_warc
