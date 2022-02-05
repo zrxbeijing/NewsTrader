@@ -2,7 +2,7 @@
 This module provides the functionality of translation.
 Translation often takes very long time.
 We utilize the argotranslate package to speed up local translation.
-""" 
+"""
 from argostranslate import package, translate
 from argostranslate import settings
 

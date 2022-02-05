@@ -7,7 +7,6 @@ from warcio.archiveiterator import ArchiveIterator
 from newsplease import NewsPlease
 from tqdm import tqdm
 from urllib.parse import urlparse
-from ..utils.storage import NewsData
 
 
 logging.basicConfig(level=logging.INFO)
@@ -36,7 +35,7 @@ class CCnewsDatabase:
     __AWS_S3_QUERY_BASE = "aws s3 ls --recursive s3://commoncrawl/crawl-data/CC-NEWS/{}/CC-NEWS-{} --no-sign-request "
 
     def __init__(
-        self, date_string, only_allowed_domains, allowed_domains, dir_path="."
+        self, date_string, only_allowed_domains, allowed_domains=None, dir_path="."
     ):
         """
         :param date_string: date input to target specific cc news blocks. e.g. "2020-01-01 12:00:00".
@@ -101,71 +100,74 @@ class CCnewsDatabase:
         :param file_path: where warc files are stored.
         :return: a DataFrame containing the parse result, i.e., the desired news records
         """
-        url_list = []
-        date_publish_list = []
-        date_download_list = []
-        date_modify_list = []
-        title_list = []
-        text_list = []
-        with open(file_path, "rb") as stream:
-            for record in tqdm(ArchiveIterator(stream)):
-                try:
-                    if record.rec_type == "response":
-                        url = record.rec_headers.get_header("WARC-Target-URI")
-                        if self.only_allowed_domains:
-                            domain = urlparse(url).netloc
-                            if "www." in domain:
-                                domain = domain[4:]
-                            if domain in self.allowed_domains:
-                                article = NewsPlease.from_warc(record)
-                                url_list.append(url)
-                                date_publish_list.append(article.date_publish)
-                                date_download_list.append(article.date_download)
-                                date_modify_list.append(article.date_modify)
-                                text_list.append(article.maintext)
-                                title_list.append(article.title)
-                            else:
-                                continue
-                        else:
-                            article = NewsPlease.from_warc(record)
-                            url_list.append(url)
-                            date_publish_list.append(article.date_publish)
-                            date_download_list.append(article.date_download)
-                            date_modify_list.append(article.date_modify)
-                            text_list.append(article.maintext)
-                            title_list.append(article.title)
 
-                except:
-                    continue
+        def _get_domain_from_url(url):
+            """
+            Get domain from url.
+            """
+            domain = urlparse(url).netloc
+            # remove "www."
+            if "www." in domain:
+                domain = domain[4:]
+            return domain
+
+        def _parse_record(record):
+            """
+            Parse warc record.
+            """
+            article = NewsPlease.from_warc(record)
+            entry = [
+                article.date_publish,
+                article.date_download,
+                article.date_modify,
+                article.maintext,
+                article.title,
+            ]
+            return entry
+
+        # prepare an empty dataframe to store result
+        result = pd.DataFrame(
+            columns=[
+                "url",
+                "date_publish",
+                "date_download",
+                "date_modify",
+                "title",
+                "article_text",
+            ]
+        )
+
+        with open(file_path, "rb") as stream:
+            # iterate through warc records
+            for record in tqdm(ArchiveIterator(stream)):
+                # keep only records with type "response"
+                if record.rec_type == "response":
+                    url = record.rec_headers.get_header("WARC-Target-URI")
+                    domain = _get_domain_from_url(url)
+                    # whether allow only some specified domains or any domains
+                    if not self.only_allowed_domains or domain in self.allowed_domains:
+                        entry = _parse_record(record)
+                        row = pd.Series([url] + entry, index=result.columns)
+                        result = result.append(row, ignore_index=True)
 
         # remove warc file
         os.remove(file_path)
-
-        return pd.DataFrame(
-            {
-                "url": url_list,
-                "date_publish": date_publish_list,
-                "date_download": date_download_list,
-                "date_modify": date_modify_list,
-                "title": title_list,
-                "article_text": text_list,
-            }
-        )
+        return result
 
 
-def get_news_from_domain(CCnews_database):
+def get_news_from_domain(ccnews_database):
     """
     Main entry point to get the desired news from specific domains.
     :return: a DataFrame containing the news data.
     """
-    query_result = CCnews_database.query_aws_s3()
+    query_result = ccnews_database.query_aws_s3()
     if not query_result:
-        logger.info("There is no news for {}".format(CCnews_database.date_string))
+        logger.info("There is no news for {}".format(ccnews_database.date_string))
         return
     news_df_list = []
     for result in query_result:
-        file_path = CCnews_database.download_cc_warc_file(result)
-        news_df = CCnews_database.parse_cc_warc_file(file_path)
+        file_path = ccnews_database.download_cc_warc_file(result)
+        news_df = ccnews_database.parse_cc_warc_file(file_path)
         news_df_list.append(news_df)
 
     final_news_df = pd.concat(news_df_list)
