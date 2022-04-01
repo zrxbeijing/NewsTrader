@@ -35,7 +35,7 @@ class CCnewsDatabase:
     __AWS_S3_QUERY_BASE = "aws s3 ls --recursive s3://commoncrawl/crawl-data/CC-NEWS/{}/CC-NEWS-{} --no-sign-request "
 
     def __init__(
-        self, date_string, only_allowed_domains, allowed_domains=None, dir_path="."
+        self, date_string, only_allowed_domains=True, allowed_domains=None, dir_path="."
     ):
         """
         :param date_string: date input to target specific cc news blocks. e.g. "2020-01-01 12:00:00".
