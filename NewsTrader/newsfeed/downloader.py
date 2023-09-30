@@ -1,29 +1,37 @@
 import scrapy
-import pandas as pd
 from scrapy.crawler import CrawlerProcess
 from newsplease import NewsPlease, NewscrawlerItem
-from ..utils.config import BROAD_CRAWL_SETTINGS
+from NewsTrader.utils.config import BROAD_CRAWL_SETTINGS
+import pandas as pd
 
 
 class NewsSpider(scrapy.Spider):
     """
     Spider for broad crawling
     """
-
-    name = "NewsSpider"
+    name = 'NewsSpider'
 
     def parse(self, response):
-        self.logger.info("Got successful response from {}".format(response.url))
+        """
+        Parses the response from a web request and extracts information to create a NewsCrawler item.
+
+        Parameters:
+        - response: The response object from the web request.
+
+        Returns:
+        - A NewsCrawler item with the extracted information.
+        """
+        self.logger.info('Got successful response from {}'.format(response.url))
         html = response.text
         article = NewsPlease.from_html(html)
         item = NewscrawlerItem()
-        item["url"] = response.url
-        item["article_title"] = article.title
-        item["article_text"] = article.maintext
+        item['url'] = response.url
+        item['article_title'] = article.title
+        item['article_text'] = article.maintext
         if article.date_publish:
-            item["article_publish_date"] = str(article.date_publish)
+            item['article_publish_date'] = str(article.date_publish)
         else:
-            item["article_publish_date"] = article.date_publish
+            item['article_publish_date'] = article.date_publish
 
         yield item
 
@@ -39,8 +47,8 @@ def get_articles(urls):
     Given geg record_df, get the original articles, by utilizing the scrapy fromework
     """
     start_crawl(urls)
-    news_df = pd.read_json("items.jl", lines=True)
+    news_df = pd.read_json('items.jl', lines=True)
     news_df = news_df.drop_duplicates()
-    url_df = pd.DataFrame({"url": urls})
-    result_df = url_df.merge(news_df, how="left", on="url")
+    url_df = pd.DataFrame({'url': urls})
+    result_df = url_df.merge(news_df, how='left', on='url')
     return result_df

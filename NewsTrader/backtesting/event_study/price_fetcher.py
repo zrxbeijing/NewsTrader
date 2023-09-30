@@ -14,15 +14,13 @@ class PriceFetcher(object):
     Otherwise we extract stock data from Yahoo Finance.
     """
 
-    def __init__(
-        self,
-        ticker=None,
-        stock_index=None,
-        start_date=None,
-        end_date=None,
-        data_df=None,
-        date_column="Date",
-    ):
+    def __init__(self,
+                 ticker=None,
+                 stock_index=None,
+                 start_date=None,
+                 end_date=None,
+                 data_df=None,
+                 date_column='Date'):
         """
         This is a price fetcher.
         :param ticker: Stock ticker.
@@ -65,10 +63,7 @@ class PriceFetcher(object):
         if (self.end_date - price_df.iloc[-1][self.date_column]).days > 0:
             end_date = price_df.iloc[-1][self.date_column]
         indicators = price_df[self.date_column].apply(
-            lambda x: True
-            if (x - start_date).days >= 0 and (x - end_date).days <= 0
-            else False
-        )
+            lambda x: True if (x - start_date).days >= 0 and (x - end_date).days <= 0 else False)
         price_df = price_df.loc[indicators, :]
         price_df = price_df.dropna().reset_index(drop=True)
         return price_df
@@ -83,9 +78,9 @@ class PriceFetcher(object):
         yahoo_df = None
         while yahoo_df is None:
             try:
-                yahoo_df = get_data_yahoo(
-                    symbols=symbol, start=self.start_date, end=self.end_date
-                )
+                yahoo_df = get_data_yahoo(symbols=symbol,
+                                          start=self.start_date,
+                                          end=self.end_date)
             except KeyError:
                 # the symbol is wrong or there is no data for this.
                 print("There is no data for the symbol {}".format(self.ticker))
@@ -100,7 +95,7 @@ class PriceFetcher(object):
         # DataFrame to what we desire.
         yahoo_df[self.date_column] = to_datetime(yahoo_df.index)
         yahoo_df = yahoo_df.reset_index(drop=True)
-        yahoo_df = yahoo_df[[self.date_column, "Adj Close"]]
+        yahoo_df = yahoo_df[[self.date_column, 'Adj Close']]
         yahoo_df.columns = [self.date_column, symbol]
-
+        
         return yahoo_df

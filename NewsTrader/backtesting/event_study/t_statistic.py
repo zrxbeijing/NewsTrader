@@ -12,3 +12,4 @@ import pandas as pd
 
 
 # step 1. calculate the combined number of estimation window residuals of the event firms.
+
